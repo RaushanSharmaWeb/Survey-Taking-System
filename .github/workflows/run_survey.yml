@@ -1,0 +1,30 @@
+name: Survey Data Check
+
+on:
+  workflow_dispatch: # Is line ka matlab hai hum button daba kar script chalayenge
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. GitHub tumhara code download karega
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. GitHub ek nakli computer par Python install karega
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # 3. Firebase library install karega
+      - name: Install dependencies
+        run: pip install firebase-admin
+
+      # 4. Tumhara Python script chalayega (Secret key ke saath)
+      - name: Run Script
+        env:
+          FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
+        run: python data_viewer.py 
+        # DHYAN DENA: 'data_viewer.py' ki jagah apni python file ka naam likhna (jaise main.py)
