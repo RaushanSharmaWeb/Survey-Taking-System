@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️‍♂️ Admin Control Room</title>
+    <style>
+        /* --- DARK HACKER THEME --- */
+        body {
+            background-color: #0f0c29;
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+            color: #00ff99; /* Hacker Green */
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 { text-shadow: 0 0 10px #00ff99; margin-bottom: 5px; }
+        p { color: #ccc; margin-bottom: 30px; }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 153, 0.2);
+            border: 1px solid #00ff99;
+        }
+
+        /* Stats Cards */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            width: 40%;
+        }
+        .number { font-size: 2em; font-weight: bold; color: white; }
+
+        /* Table Design */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.3);
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #444;
+            text-align: left;
+        }
+        th { background-color: rgba(0, 255, 153, 0.2); color: white; }
+        tr:hover { background-color: rgba(0, 255, 153, 0.1); }
+
+        /* Delete Button */
+        .del-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .del-btn:hover { background: #cc0000; }
+
+        #refreshBtn {
+            padding: 10px 20px;
+            background: #00ff99;
+            color: black;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🕵️‍♂️ SECRET ADMIN PANEL</h1>
+        <p>Survey Database Access Granted</p>
+
+        <div class="stats">
+            <div class="card">
+                <div>Total Surveys</div>
+                <div class="number" id="totalCount">0</div>
+            </div>
+            <div class="card">
+                <button id="refreshBtn" onclick="loadData()">🔄 Refresh Data</button>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Fav Language</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="4" style="text-align:center;">Loading Data... 📡</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- APNI KEYS YAHAN DAALO ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDx_B3tk9nSfFA-swyZXpEa6lkEcD6uVOQ",
+            authDomain: "survey-taking-system-3db2d.firebaseapp.com",
+            projectId: "survey-taking-system-3db2d",
+            storageBucket: "survey-taking-system-3db2d.firebasestorage.app",
+            messagingSenderId: "55770119349",
+            appId: "1:55770119349:web:e7e36debac6cb38f4e92fc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Security Check (Password)
+        const password = prompt("🔐 ADMIN PASSWORD BATAO:");
+        if (password !== "raushan123") { // Yahan password badal sakte ho
+            document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:20%'>❌ ACCESS DENIED ❌<br>Bhago yahan se!</h1>";
+            throw new Error("Wrong Password");
+        }
+
+        // Data Load Karne Ka Function
+        window.loadData = async function() {
+            const tableBody = document.getElementById("tableBody");
+            const totalCount = document.getElementById("totalCount");
+            
+            tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Fetching Data... 📡</td></tr>";
+
+            try {
+                // Latest data pehle layenge (orderBy timestamp)
+                const q = query(collection(db, "surveys"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                let html = "";
+                let count = 0;
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const id = docSnap.id;
+                    const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : "N/A";
+
+                    html += `
+                        <tr>
+                            <td>${data.name}</td>
+                            <td style="color: #ffd700;">${data.language}</td>
+                            <td>${date}</td>
+                            <td><button class="del-btn" onclick="deleteEntry('${id}')">🗑️ Delete</button></td>
+                        </tr>
+                    `;
+                    count++;
+                });
+
+                if(count === 0) {
+                    html = "<tr><td colspan='4' style='text-align:center;'>No Data Found 🤷‍♂️</td></tr>";
+                }
+
+                tableBody.innerHTML = html;
+                totalCount.innerText = count;
+
+            } catch (error) {
+                console.error("Error:", error);
+                // Agar 'index' error aaye, to bata dena
+                if(error.message.includes("index")) {
+                    alert("Firebase Console mein 'Index' banana padega (Link console mein hai). Abhi ke liye 'orderBy' hata raha hu.");
+                }
+                tableBody.innerHTML = `<tr><td colspan='4' style='color:red;'>Error Loading Data</td></tr>`;
+            }
+        }
+
+        // Delete Function
+        window.deleteEntry = async function(docId) {
+            if(confirm("Pakka delete karna hai? Waapas nahi aayega! ⚠️")) {
+                try {
+                    await deleteDoc(doc(db, "surveys", docId));
+                    alert("Uda diya! 🗑️");
+                    loadData(); // Table refresh karo
+                } catch (e) {
+                    alert("Error: " + e.message);
+                }
+            }
+        }
+
+        // Page load hote hi data lao
+        loadData();
+
+    </script>
+</body>
+</html>
