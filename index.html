@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raushan's Tech Survey 🚀</title>
+    <style>
+        /* --- DESIGN (CSS) --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            /* Colorful Animated Background */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 40px;
+            width: 320px;
+            text-align: center;
+            color: white;
+        }
+
+        h2 { margin-bottom: 20px; font-weight: 600; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box; /* Fixes padding issues */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 50px;
+            background: #fff;
+            color: #e73c7e;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>📝 Tech Survey</h2>
+        <p>Apna data neeche bharein:</p>
+        
+        <input type="text" id="username" placeholder="Apna Naam (Name)" required>
+        
+        <select id="fav_lang">
+            <option value="" disabled selected>Pasandida Language?</option>
+            <option value="Python">Python 🐍</option>
+            <option value="JavaScript">JavaScript ⚡</option>
+            <option value="C++">C++ ⚙️</option>
+            <option value="Java">Java ☕</option>
+            <option value="HTML/CSS">HTML/CSS 🎨</option>
+        </select>
+
+        <button id="submitBtn">Submit Karo ✨</button>
+    </div>
+
+    <script type="module">
+      // Import Firebase Functions
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      // --- TUMHARA CONFIGURTAION ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyDx_B3tk9nSfFA-swyZXpEa6lkEcD6uVOQ",
+        authDomain: "survey-taking-system-3db2d.firebaseapp.com",
+        projectId: "survey-taking-system-3db2d",
+        storageBucket: "survey-taking-system-3db2d.firebasestorage.app",
+        messagingSenderId: "55770119349",
+        appId: "1:55770119349:web:e7e36debac6cb38f4e92fc"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Submit Button Logic
+      const btn = document.getElementById('submitBtn');
+      
+      btn.addEventListener('click', async () => {
+          const name = document.getElementById('username').value;
+          const lang = document.getElementById('fav_lang').value;
+
+          if (name === "" || lang === "") {
+              alert("Bhai, naam aur language dono select karo! 😅");
+              return;
+          }
+
+          // Change button text
+          btn.innerText = "Saving... ⏳";
+          btn.disabled = true;
+
+          try {
+              // Save to Firestore
+              await addDoc(collection(db, "surveys"), {
+                  name: name,
+                  language: lang,
+                  timestamp: new Date()
+              });
+
+              alert("Data Save Ho Gaya! ✅\nAb Python script chala kar dekho!");
+              
+              // Reset Form
+              document.getElementById('username').value = "";
+              document.getElementById('fav_lang').value = "";
+              btn.innerText = "Submit Karo ✨";
+              btn.disabled = false;
+
+          } catch (e) {
+              console.error("Error adding document: ", e);
+              alert("Error aaya: " + e.message);
+              btn.innerText = "Try Again ❌";
+              btn.disabled = false;
+          }
+      });
+    </script>
+
+</body>
+</html>
