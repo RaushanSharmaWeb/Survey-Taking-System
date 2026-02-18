@@ -1,35 +1,31 @@
-name: Survey Data Check
+name: Survey Data Check (Debug Mode)
 
 on:
-  workflow_dispatch: # Button daba kar chalane ke liye
+  workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: GitHub tumhara code download karega
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Python environment banayega
+      # --- JASOOS COMMAND ---
+      # Ye command dikhayegi ki folder mein kya-kya hai
+      - name: List Files
+        run: ls -R
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      # Step 3: Firebase library install karega
       - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install firebase-admin
+        run: pip install firebase-admin
 
-      # Step 4: Tumhara script chalayega (Secret Key ke saath)
       - name: Run Python Script
         env:
-          # Yahan hum GitHub Secret ko Python environment mein daal rahe hain
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
-        
-        # ⚠️ IMPORTANT: Niche wali line mein apni file ka naam check karna
-        # Agar tumhari file ka naam 'data_viewer.py' hai toh wahi likhna
-        run: python main.py
+        # Yahan hum try karenge, agar fail hua toh upar list check karna
+        run: python data_viewer.py
