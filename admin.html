@@ -3,46 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🕵️‍♂️ Admin Control Room</title>
+    <title>🔐 Secure Admin Panel</title>
     <style>
         /* --- DARK HACKER THEME --- */
         body {
             background-color: #0f0c29;
             background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
-            color: #00ff99; /* Hacker Green */
+            color: #00ff99;
             font-family: 'Courier New', Courier, monospace;
-            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 153, 0.2);
+            border: 1px solid #00ff99;
             text-align: center;
         }
 
-        h1 { text-shadow: 0 0 10px #00ff99; margin-bottom: 5px; }
-        p { color: #ccc; margin-bottom: 30px; }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 255, 153, 0.2);
-            border: 1px solid #00ff99;
-        }
-
-        /* Stats Cards */
-        .stats {
+        /* Login Screen Styles */
+        #login-screen {
             display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
+            flex-direction: column;
+            align-items: center;
         }
-        .card {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 8px;
-            width: 40%;
+        
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #00ff99;
+            color: white;
+            border-radius: 5px;
+            outline: none;
         }
-        .number { font-size: 2em; font-weight: bold; color: white; }
 
-        /* Table Design */
+        button {
+            padding: 10px 25px;
+            margin-top: 10px;
+            background: #00ff99;
+            color: black;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #00cc7a; }
+
+        /* Dashboard Styles (Hidden by default) */
+        #dashboard { display: none; }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -54,95 +74,121 @@
             border-bottom: 1px solid #444;
             text-align: left;
         }
-        th { background-color: rgba(0, 255, 153, 0.2); color: white; }
-        tr:hover { background-color: rgba(0, 255, 153, 0.1); }
-
-        /* Delete Button */
-        .del-btn {
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .del-btn:hover { background: #cc0000; }
-
-        #refreshBtn {
-            padding: 10px 20px;
-            background: #00ff99;
-            color: black;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+        th { background-color: rgba(0, 255, 153, 0.2); }
+        
+        .logout-btn { background: #ff4444; color: white; float: right; }
+        .del-btn { background: #ff4444; color: white; padding: 5px 10px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🕵️‍♂️ SECRET ADMIN PANEL</h1>
-        <p>Survey Database Access Granted</p>
-
-        <div class="stats">
-            <div class="card">
-                <div>Total Surveys</div>
-                <div class="number" id="totalCount">0</div>
-            </div>
-            <div class="card">
-                <button id="refreshBtn" onclick="loadData()">🔄 Refresh Data</button>
-            </div>
+        <div id="login-screen">
+            <h1>🔐 ADMIN LOGIN</h1>
+            <p>Authorized Personnel Only</p>
+            <input type="email" id="email" placeholder="Admin Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login Access 🔓</button>
+            <p id="error-msg" style="color: red; margin-top: 10px;"></p>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>User Name</th>
-                    <th>Fav Language</th>
-                    <th>Date</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr><td colspan="4" style="text-align:center;">Loading Data... 📡</td></tr>
-            </tbody>
-        </table>
+        <div id="dashboard">
+            <button class="logout-btn" onclick="logout()">Logout 🔒</button>
+            <h1>🕵️‍♂️ CONTROL ROOM</h1>
+            <p>Welcome back, Commander!</p>
+            
+            <div style="margin-bottom: 20px;">
+                Total Surveys: <span id="totalCount" style="font-weight:bold; font-size:1.5em">0</span>
+                <button onclick="loadData()" style="margin-left: 20px;">🔄 Refresh</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Language</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="3">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc, orderBy, query } 
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- APNI KEYS YAHAN DAALO ---
+        // 🔴 APNA CONFIG YAHAN PASTE KARO
         const firebaseConfig = {
-            apiKey: "AIzaSyDx_B3tk9nSfFA-swyZXpEa6lkEcD6uVOQ",
-            authDomain: "survey-taking-system-3db2d.firebaseapp.com",
-            projectId: "survey-taking-system-3db2d",
-            storageBucket: "survey-taking-system-3db2d.firebasestorage.app",
-            messagingSenderId: "55770119349",
-            appId: "1:55770119349:web:e7e36debac6cb38f4e92fc"
+            apiKey: "AIzaSy...", 
+            authDomain: "project-id.firebaseapp.com",
+            projectId: "project-id",
+            storageBucket: "project-id.appspot.com",
+            messagingSenderId: "123...",
+            appId: "1:123..."
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Security Check (Password)
-        const password = prompt("🔐 ADMIN PASSWORD BATAO:");
-        if (password !== "raushan123") { // Yahan password badal sakte ho
-            document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:20%'>❌ ACCESS DENIED ❌<br>Bhago yahan se!</h1>";
-            throw new Error("Wrong Password");
+        // --- AUTHENTICATION LOGIC ---
+
+        // 1. Check karo user login hai ya nahi (Security Guard)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Agar login hai -> Dashboard dikhao
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadData(); // Data load karo
+            } else {
+                // Agar login nahi hai -> Login screen dikhao
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('dashboard').style.display = 'none';
+            }
+        });
+
+        // 2. Login Function
+        window.login = function() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
+
+            signInWithEmailAndPassword(auth, email, pass)
+                .then((userCredential) => {
+                    // Login successful (onAuthStateChanged khud handle karega)
+                    errorMsg.innerText = "";
+                })
+                .catch((error) => {
+                    console.error(error);
+                    errorMsg.innerText = "❌ Ghalat Email ya Password!";
+                });
         }
 
-        // Data Load Karne Ka Function
+        // 3. Logout Function
+        window.logout = function() {
+            signOut(auth).then(() => {
+                alert("Logged Out Successfully! 🔒");
+            }).catch((error) => {
+                alert("Error logging out");
+            });
+        }
+
+        // --- DATABASE LOGIC (Same as before) ---
         window.loadData = async function() {
             const tableBody = document.getElementById("tableBody");
             const totalCount = document.getElementById("totalCount");
             
-            tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Fetching Data... 📡</td></tr>";
+            tableBody.innerHTML = "<tr><td colspan='3'>Fetching Data... 📡</td></tr>";
 
             try {
-                // Latest data pehle layenge (orderBy timestamp)
+                // Sirf tab chalega jab user logged in ho
                 const q = query(collection(db, "surveys"), orderBy("timestamp", "desc"));
                 const querySnapshot = await getDocs(q);
                 
@@ -151,53 +197,35 @@
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    const id = docSnap.id;
-                    const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : "N/A";
-
                     html += `
                         <tr>
                             <td>${data.name}</td>
-                            <td style="color: #ffd700;">${data.language}</td>
-                            <td>${date}</td>
-                            <td><button class="del-btn" onclick="deleteEntry('${id}')">🗑️ Delete</button></td>
+                            <td style="color:#ffd700">${data.language}</td>
+                            <td><button class="del-btn" onclick="deleteEntry('${docSnap.id}')">Delete</button></td>
                         </tr>
                     `;
                     count++;
                 });
 
-                if(count === 0) {
-                    html = "<tr><td colspan='4' style='text-align:center;'>No Data Found 🤷‍♂️</td></tr>";
-                }
-
+                if(count === 0) html = "<tr><td colspan='3'>No Data Found</td></tr>";
                 tableBody.innerHTML = html;
                 totalCount.innerText = count;
 
             } catch (error) {
                 console.error("Error:", error);
-                // Agar 'index' error aaye, to bata dena
                 if(error.message.includes("index")) {
-                    alert("Firebase Console mein 'Index' banana padega (Link console mein hai). Abhi ke liye 'orderBy' hata raha hu.");
+                    alert("Firebase Index banana padega. Console check karo link ke liye.");
                 }
-                tableBody.innerHTML = `<tr><td colspan='4' style='color:red;'>Error Loading Data</td></tr>`;
+                tableBody.innerHTML = "<tr><td colspan='3' style='color:red'>Access Denied or Error</td></tr>";
             }
         }
 
-        // Delete Function
-        window.deleteEntry = async function(docId) {
-            if(confirm("Pakka delete karna hai? Waapas nahi aayega! ⚠️")) {
-                try {
-                    await deleteDoc(doc(db, "surveys", docId));
-                    alert("Uda diya! 🗑️");
-                    loadData(); // Table refresh karo
-                } catch (e) {
-                    alert("Error: " + e.message);
-                }
+        window.deleteEntry = async function(id) {
+            if(confirm("Delete karna hai?")) {
+                await deleteDoc(doc(db, "surveys", id));
+                loadData();
             }
         }
-
-        // Page load hote hi data lao
-        loadData();
-
     </script>
 </body>
 </html>
